@@ -98,7 +98,7 @@ net.Receive("TTT_WheelBoySpinResult", function(len, ply)
         ply:SetProperty("WheelBoySpinCount", ply.WheelBoySpinCount + 1)
         -- And check if they win this time
         if ply.WheelBoySpinCount >= spins_to_win:GetInt() then
-            ply:SetProperty("WheelBoySpinCount", nil)
+            ply:ClearProperty("WheelBoySpinCount")
             net.Start("TTT_UpdateWheelBoyWins")
                 net.WriteBool(true)
             net.Broadcast()
@@ -178,7 +178,6 @@ local function ResetFullState()
         p:SetProperty("WheelBoySpinCount", 0)
     end
     ClearEffects()
-    spinCount = 0
     net.Start("TTT_ResetWheelBoyWins")
     net.Broadcast()
 end
@@ -214,7 +213,7 @@ AddHook("TTTPlayerRoleChanged", "WheelBoy_TTTPlayerRoleChanged", function(ply, o
     -- If there's a new wheelboy, reset the spin count so
     -- they can't just build on the previous one's success
     elseif newRole == ROLE_WHEELBOY then
-        spinCount = 0
+        ply:SetProperty("WheelBoySpinCount", 0)
     end
 end)
 
@@ -249,7 +248,7 @@ local function WheelBoy_DeathLogic_PlayerDeath(victim, infl, attacker)
 
     -- This gets set to nil when the spin count exceeds the win condition (aka, the wheelboy has won)
     -- If the Wheel Boy has won, don't swap roles when someone kills them
-    if spinCount == nil then return end
+    if victim.WheelBoySpinCount == nil then return end
     if not swap_on_kill:GetBool() then return end
 
     -- Keep track of the killer for the scoreboard
